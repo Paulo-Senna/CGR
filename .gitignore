@@ -1,0 +1,23 @@
+# Build output
+build/
+*.exe
+*.o
+*.obj
+*.out
+*.a
+!lib/libglfw3.a
+
+# VSCode
+.vscode/ipch/
+.vscode/*.log
+*.code-workspace
+
+# Compiler / debug artifacts
+*.pdb
+*.ilk
+*.exp
+*.lib
+
+# OS
+Thumbs.db
+Desktop.ini
