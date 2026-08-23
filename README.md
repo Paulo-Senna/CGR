@@ -1,9 +1,5 @@
 # Cola OpenGL — Robô (GLFW + GLAD + GLU, Compatibility Profile)
 
-Tudo aqui parte do princípio que você já tem `quad = gluNewQuadric();` criado no `main()`
-e que já está dentro do contexto certo (`glMatrixMode(GL_MODELVIEW)` ativo, dentro do loop
-de `display()`). Todo bloco abaixo pode ser colado direto onde você quiser desenhar algo.
-
 ---
 
 ## Formas geométricas
