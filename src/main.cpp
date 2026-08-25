@@ -591,3 +591,21 @@ int main() {
     glfwTerminate();
     return 0;
 }
+
+// ================================================================
+// COMANDOS PRA COMPILAR E RODAR CADA MODELO (rodar no terminal, na
+// pasta do projeto). Cada .cpp tem seu proprio main(), entao cada um
+// vira um .exe separado.
+// ================================================================
+//
+// ROBO (este arquivo, main.cpp):
+//   g++ -g src/main.cpp src/glad.c -Iinclude -Llib -lglfw3 -lglu32 -lopengl32 -lgdi32 -o main.exe
+//   .\main.exe
+//
+// BONECO DE NEVE (src/snowman.cpp):
+//   g++ -g src/snowman.cpp src/glad.c -Iinclude -Llib -lglfw3 -lglu32 -lopengl32 -lgdi32 -o snowman.exe
+//   .\snowman.exe
+//
+// CASTELO (src/castle.cpp):
+//   g++ -g src/castle.cpp src/glad.c -Iinclude -Llib -lglfw3 -lglu32 -lopengl32 -lgdi32 -o castle.exe
+//   .\castle.exe
