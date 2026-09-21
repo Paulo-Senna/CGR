@@ -3,6 +3,8 @@
 #include <GLFW/glfw3.h>
 #include <GL/glu.h>
 #include <cmath>
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
 
 // ================================================================
@@ -11,6 +13,10 @@
 // empilhadas (base > meio > cabeca), com a mesma cartola preta do
 // robo, dois olhos (pontinhos pretos) e um nariz de cenoura (cone
 // laranja).
+//
+// PARTICULAS DE NEVE -- flocos (GL_POINTS, mesmo estilo do exemplo de
+// fogos de artificio do professor) caindo em loop continuo sobre o
+// boneco, mais um chao branco plano.
 // ================================================================
 
 // --- corpo: 3 esferas brancas, cada uma um pouco menor que a de baixo ---
@@ -40,10 +46,26 @@ float camElevation = 15.0f;
 const float camDistance = 4.5f;
 const float camTargetY = 1.4f;
 
+// --- neve caindo: area (coluna) por cima e ao redor do boneco ---
+const int NUM_SNOW_PARTICLES = 800;
+const float SNOW_AREA_HALF = 1.4f;         // largura/profundidade da coluna onde os flocos nascem
+const float SNOW_SPAWN_Y_MIN = 3.0f, SNOW_SPAWN_Y_MAX = 4.5f; // acima da cartola
+const float SNOW_GROUND_Y = 0.0f;          // flocos "derretem"/renascem ao tocar o chao
+const float SNOW_FALL_SPEED_MIN = 0.35f, SNOW_FALL_SPEED_MAX = 0.85f; // unidades/seg
+const float SNOW_DRIFT_MAX = 0.06f;        // leve deriva lateral (vento fraco)
+const float SNOW_POINT_SIZE = 3.0f;
+
+// --- chao de neve: quad branco plano em y = 0 ---
+const float GROUND_HALF_SIZE = 4.0f;
+
+struct SnowParticle { float x, y, z, velY, driftX, driftZ; };
+SnowParticle snow[NUM_SNOW_PARTICLES];
+
 GLUquadric* quad;
 
 float toRad(float deg) { return deg * 3.14159265f / 180.0f; }
 float clampf(float v, float lo, float hi) { return v < lo ? lo : (v > hi ? hi : v); }
+float randRange(float lo, float hi) { return lo + (float)rand() / (float)RAND_MAX * (hi - lo); }
 
 // ================================================================
 // PECAS REUTILIZAVEIS
@@ -155,8 +177,74 @@ void drawArms() {
     }
 }
 
+
+
+
+
+// ================================================================
+// PARTICULAS DE NEVE
+// ================================================================
+
+// (Re)nasce o floco `i` no topo da coluna, em posicao X/Z aleatoria.
+// `randomHeight` = true espalha a altura inicial (usado so no InitSnow,
+// pra nao nascerem todos "empilhados" no mesmo instante); nos respawns
+// durante a queda, nasce sempre perto do topo (SNOW_SPAWN_Y_MAX).
+void resetSnowParticle(int i, bool randomHeight) {
+    snow[i].x = randRange(-SNOW_AREA_HALF, SNOW_AREA_HALF);
+    snow[i].z = randRange(-SNOW_AREA_HALF, SNOW_AREA_HALF);
+    snow[i].y = randomHeight ? randRange(SNOW_GROUND_Y, SNOW_SPAWN_Y_MAX)
+                             : randRange(SNOW_SPAWN_Y_MIN, SNOW_SPAWN_Y_MAX);
+    snow[i].velY = randRange(SNOW_FALL_SPEED_MIN, SNOW_FALL_SPEED_MAX);
+    snow[i].driftX = randRange(-SNOW_DRIFT_MAX, SNOW_DRIFT_MAX);
+    snow[i].driftZ = randRange(-SNOW_DRIFT_MAX, SNOW_DRIFT_MAX);
+}
+
+void initSnow() {
+    for (int i = 0; i < NUM_SNOW_PARTICLES; ++i)
+        resetSnowParticle(i, true);
+}
+
+// Ao contrario dos fogos (particulas com "lifetime" que se apagam todas
+// juntas), aqui cada floco cai sem parar: ao tocar o chao, renasce
+// direto no topo -- efeito de nevasca continua.
+void updateSnow(float dt) {
+    for (int i = 0; i < NUM_SNOW_PARTICLES; ++i) {
+        snow[i].y -= snow[i].velY * dt;
+        snow[i].x += snow[i].driftX * dt;
+        snow[i].z += snow[i].driftZ * dt;
+        if (snow[i].y <= SNOW_GROUND_Y)
+            resetSnowParticle(i, false);
+    }
+}
+
+// nao tinha esse chao branco antes, adicionei pra fazer mais sentido com a neve
+void drawGround() {
+    glColor3f(0.92f, 0.95f, 1.0f);
+    glBegin(GL_QUADS);
+        glNormal3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(-GROUND_HALF_SIZE, 0.0f, -GROUND_HALF_SIZE);
+        glVertex3f(-GROUND_HALF_SIZE, 0.0f,  GROUND_HALF_SIZE);
+        glVertex3f( GROUND_HALF_SIZE, 0.0f,  GROUND_HALF_SIZE);
+        glVertex3f( GROUND_HALF_SIZE, 0.0f, -GROUND_HALF_SIZE);
+    glEnd();
+}
+
+// FLOCOS: pontos brancos (GL_POINTS)
+void drawSnowParticles() {
+    glDisable(GL_LIGHTING);
+    glEnable(GL_POINT_SMOOTH);
+    glPointSigze(SNOW_POINT_SIZE);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    glBegin(GL_POINTS);
+        for (int i = 0; i < NUM_SNOW_PARTICLES; ++i)
+            glVertex3f(snow[i].x, snow[i].y, snow[i].z);
+    glEnd();
+
+    glEnable(GL_LIGHTING);
+}
+
 // BONECO DE NEVE COMPLETO: 3 esferas empilhadas do chao pra cima
-// (o cursor sobe de esfera em esfera, igual aos "ossos" do robo).
 void drawSnowman() {
     glPushMatrix();
         glColor3f(0.97f, 0.97f, 0.99f); // branco de neve
@@ -215,7 +303,9 @@ void display() {
     float eyeZ = camDistance * cosf(toRad(camElevation)) * cosf(toRad(camAzimuth));
     gluLookAt(eyeX, eyeY, eyeZ, 0.0, camTargetY, 0.0, 0.0, 1.0, 0.0);
 
+    drawGround();
     drawSnowman();
+    drawSnowParticles();
 }
 
 int main() {
@@ -255,6 +345,9 @@ int main() {
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
     glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
 
+    srand((unsigned int)time(nullptr));
+    initSnow();
+
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
     framebuffer_size_callback(window, fbWidth, fbHeight);
@@ -266,6 +359,7 @@ int main() {
         lastTime = now;
 
         processInput(window, dt);
+        updateSnow(dt);
         display();
 
         glfwSwapBuffers(window);
