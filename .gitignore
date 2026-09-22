@@ -6,6 +6,9 @@ build/
 *.out
 *.a
 !lib/libglfw3.a
+/main
+/snowman
+/castle
 
 # VSCode
 .vscode/ipch/

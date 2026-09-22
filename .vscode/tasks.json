@@ -10,13 +10,13 @@
                 "${workspaceFolder}/src/main.cpp",
                 "${workspaceFolder}/src/glad.c",
                 "-I${workspaceFolder}/include",
-                "-L${workspaceFolder}/lib",
-                "-lglfw3",
-                "-lglu32",
-                "-lopengl32",
-                "-lgdi32",
+                "-lglfw",
+                "-lGL",
+                "-lGLU",
+                "-ldl",
+                "-lpthread",
                 "-o",
-                "${workspaceFolder}/main.exe"
+                "${workspaceFolder}/main"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -26,7 +26,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Compila main.cpp + glad.c com g++ (MinGW) linkando GLFW e OpenGL"
+            "detail": "Compila main.cpp + glad.c com g++ (Linux) linkando GLFW e OpenGL do sistema"
         },
         {
             "label": "build snowman",
@@ -37,20 +37,20 @@
                 "${workspaceFolder}/src/snowman.cpp",
                 "${workspaceFolder}/src/glad.c",
                 "-I${workspaceFolder}/include",
-                "-L${workspaceFolder}/lib",
-                "-lglfw3",
-                "-lglu32",
-                "-lopengl32",
-                "-lgdi32",
+                "-lglfw",
+                "-lGL",
+                "-lGLU",
+                "-ldl",
+                "-lpthread",
                 "-o",
-                "${workspaceFolder}/snowman.exe"
+                "${workspaceFolder}/snowman"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
             "problemMatcher": ["$gcc"],
             "group": "build",
-            "detail": "Compila snowman.cpp + glad.c com g++ (MinGW) linkando GLFW e OpenGL"
+            "detail": "Compila snowman.cpp + glad.c com g++ (Linux) linkando GLFW e OpenGL do sistema"
         },
         {
             "label": "build castle",
@@ -61,20 +61,20 @@
                 "${workspaceFolder}/src/castle.cpp",
                 "${workspaceFolder}/src/glad.c",
                 "-I${workspaceFolder}/include",
-                "-L${workspaceFolder}/lib",
-                "-lglfw3",
-                "-lglu32",
-                "-lopengl32",
-                "-lgdi32",
+                "-lglfw",
+                "-lGL",
+                "-lGLU",
+                "-ldl",
+                "-lpthread",
                 "-o",
-                "${workspaceFolder}/castle.exe"
+                "${workspaceFolder}/castle"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
             "problemMatcher": ["$gcc"],
             "group": "build",
-            "detail": "Compila castle.cpp + glad.c com g++ (MinGW) linkando GLFW e OpenGL"
+            "detail": "Compila castle.cpp + glad.c com g++ (Linux) linkando GLFW e OpenGL do sistema"
         }
     ]
 }

@@ -1,4 +1,6 @@
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <GL/glu.h>
@@ -233,7 +235,7 @@ void drawGround() {
 void drawSnowParticles() {
     glDisable(GL_LIGHTING);
     glEnable(GL_POINT_SMOOTH);
-    glPointSigze(SNOW_POINT_SIZE);
+    glPointSize(SNOW_POINT_SIZE);
     glColor3f(1.0f, 1.0f, 1.0f);
 
     glBegin(GL_POINTS);
