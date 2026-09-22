@@ -187,17 +187,16 @@ void drawArms() {
 // PARTICULAS DE NEVE
 // ================================================================
 
-// (Re)nasce o floco `i` no topo da coluna, em posicao X/Z aleatoria.
-// `randomHeight` = true espalha a altura inicial (usado so no InitSnow,
-// pra nao nascerem todos "empilhados" no mesmo instante); nos respawns
-// durante a queda, nasce sempre perto do topo (SNOW_SPAWN_Y_MAX).
+
+// `randomHeight` = true espalha a altura inicial
+//nasce sempre perto do topo (SNOW_SPAWN_Y_MAX)
 void resetSnowParticle(int i, bool randomHeight) {
-    snow[i].x = randRange(-SNOW_AREA_HALF, SNOW_AREA_HALF);
-    snow[i].z = randRange(-SNOW_AREA_HALF, SNOW_AREA_HALF);
-    snow[i].y = randomHeight ? randRange(SNOW_GROUND_Y, SNOW_SPAWN_Y_MAX)
-                             : randRange(SNOW_SPAWN_Y_MIN, SNOW_SPAWN_Y_MAX);
-    snow[i].velY = randRange(SNOW_FALL_SPEED_MIN, SNOW_FALL_SPEED_MAX);
-    snow[i].driftX = randRange(-SNOW_DRIFT_MAX, SNOW_DRIFT_MAX);
+    snow[i].x = randRange(-SNOW_AREA_HALF, SNOW_AREA_HALF); //spawn X: nasce em X aleatorio
+    snow[i].z = randRange(-SNOW_AREA_HALF, SNOW_AREA_HALF); // spawn Z: nasce em Z aleatorio
+    snow[i].y = randomHeight ? randRange(SNOW_GROUND_Y, SNOW_SPAWN_Y_MAX) //Y: altura inicial aleatoria (so no initSnow, espalha os flocos)
+                             : randRange(SNOW_SPAWN_Y_MIN, SNOW_SPAWN_Y_MAX); // Y: respawn normal, sempre perto do topo
+    snow[i].velY = randRange(SNOW_FALL_SPEED_MIN, SNOW_FALL_SPEED_MAX); //VELOCIDADE
+    snow[i].driftX = randRange(-SNOW_DRIFT_MAX, SNOW_DRIFT_MAX); //DIRECAO
     snow[i].driftZ = randRange(-SNOW_DRIFT_MAX, SNOW_DRIFT_MAX);
 }
 
@@ -206,16 +205,14 @@ void initSnow() {
         resetSnowParticle(i, true);
 }
 
-// Ao contrario dos fogos (particulas com "lifetime" que se apagam todas
-// juntas), aqui cada floco cai sem parar: ao tocar o chao, renasce
-// direto no topo -- efeito de nevasca continua.
+//quando toca no chao, nasce direto no topo
 void updateSnow(float dt) {
     for (int i = 0; i < NUM_SNOW_PARTICLES; ++i) {
-        snow[i].y -= snow[i].velY * dt;
-        snow[i].x += snow[i].driftX * dt;
-        snow[i].z += snow[i].driftZ * dt;
-        if (snow[i].y <= SNOW_GROUND_Y)
-            resetSnowParticle(i, false);
+        snow[i].y -= snow[i].velY * dt; //posicao/velicidade: desce em Y = velocidade * tempo desde o ultimo frame
+        snow[i].x += snow[i].driftX * dt; //direcao: desloca X conforme a deriva (vento)
+        snow[i].z += snow[i].driftZ * dt; //direcao: desloca em Z conforme a deriva
+        if (snow[i].y <= SNOW_GROUND_Y) //chegou no chao
+            resetSnowParticle(i, false); //renasce no topo com nova velocidade/direcaom, por isso o false
     }
 }
 
@@ -233,20 +230,20 @@ void drawGround() {
 
 // FLOCOS: pontos brancos (GL_POINTS)
 void drawSnowParticles() {
-    glDisable(GL_LIGHTING);
-    glEnable(GL_POINT_SMOOTH);
-    glPointSize(SNOW_POINT_SIZE);
-    glColor3f(1.0f, 1.0f, 1.0f);
+    glDisable(GL_LIGHTING); //pontos sem luz
+    glEnable(GL_POINT_SMOOTH); //deixa o ponto redondo em vez de quadrado, como eles eram pequenos
+    glPointSize(SNOW_POINT_SIZE); //tamanho em pixel
+    glColor3f(1.0f, 1.0f, 1.0f); //cor branca
 
     glBegin(GL_POINTS);
         for (int i = 0; i < NUM_SNOW_PARTICLES; ++i)
-            glVertex3f(snow[i].x, snow[i].y, snow[i].z);
+            glVertex3f(snow[i].x, snow[i].y, snow[i].z); //posicao: desenha o floco i na posicao atual dele
     glEnd();
 
     glEnable(GL_LIGHTING);
 }
 
-// BONECO DE NEVE COMPLETO: 3 esferas empilhadas do chao pra cima
+// BONECO DE NEVE
 void drawSnowman() {
     glPushMatrix();
         glColor3f(0.97f, 0.97f, 0.99f); // branco de neve
